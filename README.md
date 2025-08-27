@@ -34,8 +34,6 @@ O pacote intercepta os eventos do runner (before:run, after:spec, after:run), en
 
 Defina estas variáveis no seu **CI** (e opcionalmente localmente):
 
-*   `Q_PORTAL_URL` → URL do endpoint de ingestão do Quollabore (sua Edge Function).  
-    Ex.: `https://<seu-projeto>.functions.supabase.co/qa-report`
 *   `Q_INGEST_TOKEN` → Token do **projeto/ambiente** (Bearer) para enviar reports.
 *   `Q_PROJECT_ID` → UUID do projeto no Portal Quollabore.
 *   `Q_ENV` (opcional) → ambiente lógico (`dev`, `staging`, `prod`, …). _default:_ `prod`.
@@ -73,7 +71,6 @@ export default defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       return withQuollabore(on, config, {
-        portalUrl: process.env.Q_PORTAL_URL,
         token: process.env.Q_INGEST_TOKEN,
         projectId: process.env.Q_PROJECT_ID,
         environment: process.env.Q_ENV ?? 'prod',
@@ -88,7 +85,6 @@ export default defineConfig({
 ### Interface de opções
 ```
 type QuollaboreOptions = {
-  portalUrl?: string;       // default: process.env.Q_PORTAL_URL
   token?: string;           // default: process.env.Q_INGEST_TOKEN
   projectId?: string;       // default: process.env.Q_PROJECT_ID
   environment?: string;     // default: process.env.Q_ENV || 'prod'
@@ -126,7 +122,6 @@ jobs:
       - run: npm ci
       - run: npx cypress install
       - env:
-          Q_PORTAL_URL: ${{ secrets.Q_PORTAL_URL }}
           Q_INGEST_TOKEN: ${{ secrets.Q_INGEST_TOKEN }}
           Q_PROJECT_ID: ${{ secrets.Q_PROJECT_ID }}
           Q_ENV: prod
@@ -144,7 +139,6 @@ e2e:cypress:
     - npm ci
     - cypress run --browser chrome --headless
   variables:
-    Q_PORTAL_URL: $Q_PORTAL_URL
     Q_INGEST_TOKEN: $Q_INGEST_TOKEN
     Q_PROJECT_ID: $Q_PROJECT_ID
     Q_ENV: "prod"
@@ -163,7 +157,6 @@ steps:
   - script: npx cypress install
   - script: npx cypress run --browser chrome --headless
     env:
-      Q_PORTAL_URL: $(Q_PORTAL_URL)
       Q_INGEST_TOKEN: $(Q_INGEST_TOKEN)
       Q_PROJECT_ID: $(Q_PROJECT_ID)
       Q_ENV: prod
@@ -175,7 +168,7 @@ steps:
 
 *    Instalou o pacote (`@quollabore/cypress-reporter` **ou** `quollabore-cypress-reporter`)?
 *   Adicionou `withQuollabore` no `cypress.config.ts`?
-*   Definiu `Q_PORTAL_URL`, `Q_INGEST_TOKEN`, `Q_PROJECT_ID` no CI?
+*   Definiu `Q_INGEST_TOKEN`, `Q_PROJECT_ID` no CI?
 *   Sua Edge Function está publicada e validando `Authorization: Bearer <token>`?
 *   Tabelas `automation_*` criadas e com Realtime habilitado (se for usar live)?
 
@@ -183,14 +176,14 @@ steps:
 
 ## 🛠️ Troubleshooting
 
-`**Q_PORTAL_URL não definido**` **/** `**Q_INGEST_TOKEN não definido**` **/** `**Q_PROJECT_ID não definido**`  
+`**Q_INGEST_TOKEN não definido**` **/** `**Q_PROJECT_ID não definido**`  
 → Garanta que as variáveis estejam presentes no ambiente do job do CI (e não só no repositório local).
 
 **HTTP 401/403**  
 → Token inválido/revogado ou a função não está aceitando o Bearer. Verifique a validação na Edge Function.
 
 **HTTP 404/5xx**  
-→ URL incorreta ou a função está fora do ar. Teste localmente com `curl` e verifique os logs do Supabase.
+→ Função está fora do ar. Teste localmente com `curl` e verifique os logs do Supabase.
 
 **Nada aparece no portal**  
 → Confirme se os eventos estão chegando (logs da função) e se as **FKs** (`automation_suites.run_id`, `automation_cases.suite_id`, etc.) batem com o schema.
@@ -212,4 +205,3 @@ Encontrou um problema ou tem sugestão? Abra uma issue no repositório do projet
 
 ---
 
-> **Dica:** Na sua tela **Integrations** do Quollabore, copie e cole o bloco “Configuração rápida” deste README com os comandos e exemplos já preenchidos com a **URL do seu projeto**.
