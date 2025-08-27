@@ -21,13 +21,14 @@ O pacote intercepta os eventos do runner (before:run, after:spec, after:run), en
 
 **Se publicou com escopo:**
 
-`import { defineConfig } from 'cypress'; 
- import { withQuollabore } from 'quollabore-cypress-reporter'; 
- export default defineConfig({  
+```import { defineConfig } from 'cypress'; 
+  import { withQuollabore } from 'quollabore-cypress-reporter'; 
+  export default defineConfig({  
     e2e: {    
        setupNodeEvents: withQuollabore, // 1 linha: injeta todos os hooks necessários  
        }, 
-    });`
+    });
+```
 
 ### Variáveis de ambiente (obrigatório)
 
@@ -64,11 +65,37 @@ Campos de **Git/CI** preenchidos automaticamente (ou via ENV):
 
 Você pode passar opções diretamente ao `withQuollabore` para sobrescrever as ENVs:
 
-`import { defineConfig } from 'cypress'; import { withQuollabore } from '@quollabore/cypress-reporter'; export default defineConfig({  e2e: {    setupNodeEvents(on, config) {      return withQuollabore(on, config, {        portalUrl: process.env.Q_PORTAL_URL,        token: process.env.Q_INGEST_TOKEN,        projectId: process.env.Q_PROJECT_ID,        environment: process.env.Q_ENV ?? 'prod',        parallelTotal: Number(process.env.PARALLEL_TOTAL ?? 1),        cypressNodeIndex: Number(process.env.CYPRESS_NODE_INDEX ?? 0),      });    },  }, });`
+```
+import { defineConfig } from 'cypress';
+import { withQuollabore } from 'quollabore-cypress-reporter';
+
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      return withQuollabore(on, config, {
+        portalUrl: process.env.Q_PORTAL_URL,
+        token: process.env.Q_INGEST_TOKEN,
+        projectId: process.env.Q_PROJECT_ID,
+        environment: process.env.Q_ENV ?? 'prod',
+        parallelTotal: Number(process.env.PARALLEL_TOTAL ?? 1),
+        cypressNodeIndex: Number(process.env.CYPRESS_NODE_INDEX ?? 0),
+      });
+    },
+  },
+});
+```
 
 ### Interface de opções
-
-`type QuollaboreOptions = {  portalUrl?: string;       // default: process.env.Q_PORTAL_URL  token?: string;           // default: process.env.Q_INGEST_TOKEN  projectId?: string;       // default: process.env.Q_PROJECT_ID  environment?: string;     // default: process.env.Q_ENV || 'prod'  parallelTotal?: number;   // default: process.env.PARALLEL_TOTAL || 1  cypressNodeIndex?: number;// default: process.env.CYPRESS_NODE_INDEX || 0 };`
+```
+type QuollaboreOptions = {
+  portalUrl?: string;       // default: process.env.Q_PORTAL_URL
+  token?: string;           // default: process.env.Q_INGEST_TOKEN
+  projectId?: string;       // default: process.env.Q_PROJECT_ID
+  environment?: string;     // default: process.env.Q_ENV || 'prod'
+  parallelTotal?: number;   // default: process.env.PARALLEL_TOTAL || 1
+  cypressNodeIndex?: number;// default: process.env.CYPRESS_NODE_INDEX || 0
+};
+```
 
 > Se você **não** passar nada, o reporter usa apenas as variáveis de ambiente.
 
@@ -85,16 +112,62 @@ Você pode passar opções diretamente ao `withQuollabore` para sobrescrever as 
 ## 🧭 Exemplos de CI
 
 ### GitHub Actions
+```
+name: e2e
+on: [push]
 
-`name: e2e on: [push] jobs:  cypress:    runs-on: ubuntu-latest    steps:      - uses: actions/checkout@v4      - uses: actions/setup-node@v4        with: { node-version: 20 }      - run: npm ci      - run: npx cypress install      - env:          Q_PORTAL_URL: ${{ secrets.Q_PORTAL_URL }}          Q_INGEST_TOKEN: ${{ secrets.Q_INGEST_TOKEN }}          Q_PROJECT_ID: ${{ secrets.Q_PROJECT_ID }}          Q_ENV: prod          # (opcional) paralelismo          PARALLEL_TOTAL: 2          CYPRESS_NODE_INDEX: 0        run: npx cypress run --browser chrome --headless` 
+jobs:
+  cypress:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: npx cypress install
+      - env:
+          Q_PORTAL_URL: ${{ secrets.Q_PORTAL_URL }}
+          Q_INGEST_TOKEN: ${{ secrets.Q_INGEST_TOKEN }}
+          Q_PROJECT_ID: ${{ secrets.Q_PROJECT_ID }}
+          Q_ENV: prod
+          # (opcional) paralelismo
+          PARALLEL_TOTAL: 2
+          CYPRESS_NODE_INDEX: 0
+        run: npx cypress run --browser chrome --headless
+```
 
 ### GitLab CI
-
-`e2e:cypress:  image: cypress/included:13.7.0  script:    - npm ci    - cypress run --browser chrome --headless  variables:    Q_PORTAL_URL: $Q_PORTAL_URL    Q_INGEST_TOKEN: $Q_INGEST_TOKEN    Q_PROJECT_ID: $Q_PROJECT_ID    Q_ENV: "prod"` 
+```
+e2e:cypress:
+  image: cypress/included:13.7.0
+  script:
+    - npm ci
+    - cypress run --browser chrome --headless
+  variables:
+    Q_PORTAL_URL: $Q_PORTAL_URL
+    Q_INGEST_TOKEN: $Q_INGEST_TOKEN
+    Q_PROJECT_ID: $Q_PROJECT_ID
+    Q_ENV: "prod"
+ 
+```
 
 ### Azure Pipelines
+```
+pool:
+  vmImage: ubuntu-latest
 
-`pool:  vmImage: ubuntu-latest steps:  - task: NodeTool@0    inputs: { versionSpec: '20.x' }  - script: npm ci  - script: npx cypress install  - script: npx cypress run --browser chrome --headless    env:      Q_PORTAL_URL: $(Q_PORTAL_URL)      Q_INGEST_TOKEN: $(Q_INGEST_TOKEN)      Q_PROJECT_ID: $(Q_PROJECT_ID)      Q_ENV: prod` 
+steps:
+  - task: NodeTool@0
+    inputs: { versionSpec: '20.x' }
+  - script: npm ci
+  - script: npx cypress install
+  - script: npx cypress run --browser chrome --headless
+    env:
+      Q_PORTAL_URL: $(Q_PORTAL_URL)
+      Q_INGEST_TOKEN: $(Q_INGEST_TOKEN)
+      Q_PROJECT_ID: $(Q_PROJECT_ID)
+      Q_ENV: prod
+```
 
 ---
 
