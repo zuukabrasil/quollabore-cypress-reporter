@@ -1,0 +1,26 @@
+{
+  "name": "@quollabore/cypress-reporter",
+  "version": "0.1.0",
+  "description": "Cypress Node events reporter for Quollabore portal",
+  "type": "module",
+  "main": "dist/plugin.cjs",
+  "module": "dist/plugin.js",
+  "types": "dist/plugin.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.js",
+      "require": "./dist/plugin.cjs"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc && node scripts/cjs.js"
+  },
+  "peerDependencies": {
+    "cypress": ">=10.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
