@@ -1,5 +1,5 @@
 {
-  "name": "@quollabore/cypress-reporter",
+  "name": "quollabore-cypress-reporter",
   "version": "0.1.0",
   "description": "Cypress Node events reporter for Quollabore portal",
   "type": "module",
