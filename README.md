@@ -11,8 +11,9 @@ O pacote intercepta os eventos do runner (before:run, after:spec, after:run), en
 
 **Com escopo (recomendado):**
 
-`npm i -D quollabore-cypress-reporter # ou yarn add -D -quollabore-cypress-reporter`
-
+``` 
+npm i -D quollabore-cypress-reporter 
+```
 ---
 
 ## ⚙️ Configuração rápida
@@ -21,13 +22,15 @@ O pacote intercepta os eventos do runner (before:run, after:spec, after:run), en
 
 **Se publicou com escopo:**
 
-```import { defineConfig } from 'cypress'; 
-  import { withQuollabore } from 'quollabore-cypress-reporter'; 
-  export default defineConfig({  
-    e2e: {    
-       setupNodeEvents: withQuollabore, // 1 linha: injeta todos os hooks necessários  
-       }, 
-    });
+```
+import { defineConfig } from 'cypress';
+import { withQuollabore } from 'quollabore-cypress-reporter';
+
+export default defineConfig({
+  e2e: {
+    setupNodeEvents: withQuollabore, // 1 linha: injeta todos os hooks necessários
+  },
+});
 ```
 
 ### Variáveis de ambiente (obrigatório)
@@ -80,28 +83,22 @@ export default defineConfig({
     },
   },
 });
+
 ```
 
 ### Interface de opções
 ```
 type QuollaboreOptions = {
-  token?: string;           // default: process.env.Q_INGEST_TOKEN
-  projectId?: string;       // default: process.env.Q_PROJECT_ID
-  environment?: string;     // default: process.env.Q_ENV || 'prod'
-  parallelTotal?: number;   // default: process.env.PARALLEL_TOTAL || 1
-  cypressNodeIndex?: number;// default: process.env.CYPRESS_NODE_INDEX || 0
+  token?: string;            // default: process.env.Q_INGEST_TOKEN
+  projectId?: string;        // default: process.env.Q_PROJECT_ID
+  environment?: string;      // default: process.env.Q_ENV || 'prod'
+  parallelTotal?: number;    // default: 1
+  cypressNodeIndex?: number; // default: 0
 };
+
 ```
 
 > Se você **não** passar nada, o reporter usa apenas as variáveis de ambiente.
-
----
-
-## 🔐 Segurança
-
-*   Use **token por projeto/ambiente**, nunca tokens pessoais.
-*   Guarde `Q_INGEST_TOKEN` como **secret** no CI (GitHub/GitLab/Azure/Bitbucket).
-*   A Edge Function deve **validar o Bearer** recebido (ideal: comparar **hash** em tabela de tokens).
 
 ---
 
@@ -125,10 +122,8 @@ jobs:
           Q_INGEST_TOKEN: ${{ secrets.Q_INGEST_TOKEN }}
           Q_PROJECT_ID: ${{ secrets.Q_PROJECT_ID }}
           Q_ENV: prod
-          # (opcional) paralelismo
-          PARALLEL_TOTAL: 2
-          CYPRESS_NODE_INDEX: 0
         run: npx cypress run --browser chrome --headless
+
 ```
 
 ### GitLab CI
@@ -142,6 +137,7 @@ e2e:cypress:
     Q_INGEST_TOKEN: $Q_INGEST_TOKEN
     Q_PROJECT_ID: $Q_PROJECT_ID
     Q_ENV: "prod"
+
  
 ```
 
@@ -160,33 +156,16 @@ steps:
       Q_INGEST_TOKEN: $(Q_INGEST_TOKEN)
       Q_PROJECT_ID: $(Q_PROJECT_ID)
       Q_ENV: prod
+
 ```
 
 ---
 
 ## ✅ Checklist de integração
 
-*    Instalou o pacote (`@quollabore/cypress-reporter` **ou** `quollabore-cypress-reporter`)?
+*   Instalou quollabore-cypress-reporter?
 *   Adicionou `withQuollabore` no `cypress.config.ts`?
 *   Definiu `Q_INGEST_TOKEN`, `Q_PROJECT_ID` no CI?
-*   Sua Edge Function está publicada e validando `Authorization: Bearer <token>`?
-*   Tabelas `automation_*` criadas e com Realtime habilitado (se for usar live)?
-
----
-
-## 🛠️ Troubleshooting
-
-`**Q_INGEST_TOKEN não definido**` **/** `**Q_PROJECT_ID não definido**`  
-→ Garanta que as variáveis estejam presentes no ambiente do job do CI (e não só no repositório local).
-
-**HTTP 401/403**  
-→ Token inválido/revogado ou a função não está aceitando o Bearer. Verifique a validação na Edge Function.
-
-**HTTP 404/5xx**  
-→ Função está fora do ar. Teste localmente com `curl` e verifique os logs do Supabase.
-
-**Nada aparece no portal**  
-→ Confirme se os eventos estão chegando (logs da função) e se as **FKs** (`automation_suites.run_id`, `automation_cases.suite_id`, etc.) batem com o schema.
 
 ---
 
