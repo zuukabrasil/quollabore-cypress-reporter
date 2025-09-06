@@ -30,6 +30,9 @@ export type LoadedOptions = Required<Pick<
   git_actor: string;
 };
 
+const DEFAULT_PORTAL_URL = 'https://report-api.quollabore.com/';
+
+
 function fromEnv(name: string, fallback = ''): string {
   return (process.env[name] ?? fallback).toString();
 }
@@ -45,7 +48,7 @@ function autodetectCI() {
     return {
       git_branch: fromEnv('GITHUB_REF_NAME'),
       git_commit_sha: fromEnv('GITHUB_SHA'),
-      git_commit_msg: fromEnv('GITHUB_HEAD_REF') || '', // (msg não vem fácil; pode preencher depois)
+      git_commit_msg: fromEnv('GITHUB_HEAD_REF') || '',
       git_actor: fromEnv('GITHUB_ACTOR'),
       ci_job_id: fromEnv('GITHUB_RUN_ID'),
     };
@@ -96,7 +99,8 @@ export function loadOptions(opts: QuollaboreOptions = {}): LoadedOptions {
   const token = opts.token ?? fromEnv('Q_INGEST_TOKEN');
   const projectId = opts.projectId ?? fromEnv('Q_PROJECT_ID');
   const environment = opts.environment ?? fromEnv('Q_ENV', 'prod');
-  const portalUrl = opts.portalUrl ?? fromEnv('Q_PORTAL_URL', process.env.Q_PORTAL_URL ?? '');
+  const portalUrl   = opts.portalUrl ?? fromEnv('Q_PORTAL_URL', process.env.Q_PORTAL_URL ?? DEFAULT_PORTAL_URL);
+
 
   const parallelTotal = opts.parallelTotal ?? fromEnvNum('PARALLEL_TOTAL', 1);
   const cypressNodeIndex = opts.cypressNodeIndex ?? fromEnvNum('CYPRESS_NODE_INDEX', 0);

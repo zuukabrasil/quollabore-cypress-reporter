@@ -1,6 +1,6 @@
 {
   "name": "quollabore-cypress-reporter",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Cypress Node events reporter for Quollabore portal",
   "type": "module",
   "main": "dist/plugin.cjs",
